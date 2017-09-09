@@ -17,20 +17,20 @@
 package com.example.android.android_me.ui;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 
 import java.util.List;
 
 
 // Custom adapter class that displays a list of Android-Me images in a GridView
-public class MasterListAdapter extends BaseAdapter {
+public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.AndroidViewHolder> {
 
     // Keeps track of the context and list of images to display
     private Context mContext;
+    private MasterListFragment.OnImageClickListener onImageClickListener;
     private List<Integer> mImageIds;
 
     /**
@@ -40,24 +40,38 @@ public class MasterListAdapter extends BaseAdapter {
     public MasterListAdapter(Context context, List<Integer> imageIds) {
         mContext = context;
         mImageIds = imageIds;
+        onImageClickListener = (MasterListFragment.OnImageClickListener) context;
     }
 
-    /**
-     * Returns the number of items the adapter will display
-     */
+
     @Override
-    public int getCount() {
+    public AndroidViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        ImageView imageView = new ImageView(mContext);
+        imageView.setTag("image_view");
+        imageView.setAdjustViewBounds(true);
+        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        imageView.setPadding(8, 8, 8, 8);
+
+        AndroidViewHolder viewHolder = new AndroidViewHolder(imageView);
+
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(AndroidViewHolder holder, final int position) {
+        ImageView imageView = holder.itemView.findViewWithTag("image_view");
+        imageView.setImageResource(mImageIds.get(position));
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onImageClickListener.onImageSelected(position);
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
         return mImageIds.size();
-    }
-
-    @Override
-    public Object getItem(int i) {
-        return null;
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return 0;
     }
 
     /**
@@ -69,9 +83,9 @@ public class MasterListAdapter extends BaseAdapter {
             // If the view is not recycled, this creates a new ImageView to hold an image
             imageView = new ImageView(mContext);
             // Define the layout parameters
-            imageView.setAdjustViewBounds(true);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(8, 8, 8, 8);
+//            imageView.setAdjustViewBounds(true);
+//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//            imageView.setPadding(8, 8, 8, 8);
         } else {
             imageView = (ImageView) convertView;
         }
@@ -81,4 +95,10 @@ public class MasterListAdapter extends BaseAdapter {
         return imageView;
     }
 
+    class AndroidViewHolder extends RecyclerView.ViewHolder {
+
+        public AndroidViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
 }

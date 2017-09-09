@@ -16,17 +16,48 @@
 
 package com.example.android.android_me.ui;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.example.android.android_me.R;
+import com.example.android.android_me.data.AndroidImageAssets;
 
 // This activity will display a custom Android image composed of three body parts: head, body, and legs
 public class AndroidMeActivity extends AppCompatActivity {
+
+    public final static String INDEX_KEY_HEAD = "IMAGE_INDEX_HEAD";
+    public final static String INDEX_KEY_BODY = "IMAGE_INDEX_BODY";
+    public final static String INDEX_KEY_FOOT = "IMAGE_INDEX_FOOT";
+
+    private int headIndex;
+    private int bodyIndex;
+    private int footIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_android_me);
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle!=null) {
+            headIndex = bundle.getInt(INDEX_KEY_HEAD);
+            bodyIndex = bundle.getInt(INDEX_KEY_BODY);
+            footIndex = bundle.getInt(INDEX_KEY_FOOT);
+        }
+
+        if(savedInstanceState == null) {
+
+            BodyPartFragment headFragment = BodyPartFragment.newInstance(AndroidImageAssets.getHeads(), headIndex);
+            BodyPartFragment bodyFragment = BodyPartFragment.newInstance(AndroidImageAssets.getBodies(), bodyIndex);
+            BodyPartFragment footFragment = BodyPartFragment.newInstance(AndroidImageAssets.getLegs(), footIndex);
+
+            FragmentManager fm = getSupportFragmentManager();
+            fm.beginTransaction()
+                    .add(R.id.head_container, headFragment)
+                    .add(R.id.body_container, bodyFragment)
+                    .add(R.id.foot_container, footFragment)
+                    .commit();
+        }
     }
 }
