@@ -18,55 +18,45 @@ package com.example.android.android_me.ui;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.example.android.android_me.R;
 
 import java.util.List;
 
 
 // Custom adapter class that displays a list of Android-Me images in a GridView
 public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.AndroidViewHolder> {
+    private static final String TAG = "MasterListAdapter";
 
-    // Keeps track of the context and list of images to display
-    private Context mContext;
-    private MasterListFragment.OnImageClickListener onImageClickListener;
+    private LayoutInflater mLayoutInflater;
+    private MasterListFragment.MasterListClickListener masterListClickListener;
     private List<Integer> mImageIds;
 
-    /**
-     * Constructor method
-     * @param imageIds The list of images to display
-     */
     public MasterListAdapter(Context context, List<Integer> imageIds) {
-        mContext = context;
+        mLayoutInflater = LayoutInflater.from(context);
         mImageIds = imageIds;
-        onImageClickListener = (MasterListFragment.OnImageClickListener) context;
+        if(context instanceof MasterListFragment.MasterListClickListener) {
+            masterListClickListener = (MasterListFragment.MasterListClickListener) context;
+        }
     }
 
 
     @Override
     public AndroidViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ImageView imageView = new ImageView(mContext);
-        imageView.setTag("image_view");
-        imageView.setAdjustViewBounds(true);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        imageView.setPadding(8, 8, 8, 8);
+        Log.d(TAG, "onCreateViewHolder: had to create a new image view");
+        View imageView = mLayoutInflater.inflate(R.layout.simple_android_list_item, parent, false);
 
-        AndroidViewHolder viewHolder = new AndroidViewHolder(imageView);
-
-        return viewHolder;
+        return new AndroidViewHolder(imageView);
     }
 
     @Override
-    public void onBindViewHolder(AndroidViewHolder holder, final int position) {
-        ImageView imageView = holder.itemView.findViewWithTag("image_view");
-        imageView.setImageResource(mImageIds.get(position));
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onImageClickListener.onImageSelected(position);
-            }
-        });
+    public void onBindViewHolder(final AndroidViewHolder holder, int position) {
+        holder.imageView.setImageResource(mImageIds.get(position));
     }
 
     @Override
@@ -74,31 +64,22 @@ public class MasterListAdapter extends RecyclerView.Adapter<MasterListAdapter.An
         return mImageIds.size();
     }
 
-    /**
-     * Creates a new ImageView for each item referenced by the adapter
-     */
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
-        if (convertView == null) {
-            // If the view is not recycled, this creates a new ImageView to hold an image
-            imageView = new ImageView(mContext);
-            // Define the layout parameters
-//            imageView.setAdjustViewBounds(true);
-//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//            imageView.setPadding(8, 8, 8, 8);
-        } else {
-            imageView = (ImageView) convertView;
-        }
+    class AndroidViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        // Set the image resource and return the newly created ImageView
-        imageView.setImageResource(mImageIds.get(position));
-        return imageView;
-    }
-
-    class AndroidViewHolder extends RecyclerView.ViewHolder {
+        public ImageView imageView;
 
         public AndroidViewHolder(View itemView) {
             super(itemView);
+
+            imageView = (ImageView) itemView;
+            imageView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if(masterListClickListener != null) {
+                masterListClickListener.onImageSelected(getAdapterPosition());
+            }
         }
     }
 }

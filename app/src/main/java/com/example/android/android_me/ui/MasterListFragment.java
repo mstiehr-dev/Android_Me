@@ -1,17 +1,17 @@
 package com.example.android.android_me.ui;
 
 import android.content.Context;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ListAdapter;
+import android.widget.Button;
 
 import com.example.android.android_me.R;
 import com.example.android.android_me.data.AndroidImageAssets;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class MasterListFragment extends Fragment {
 
-    private OnImageClickListener onImageClickListener;
+    private MasterListClickListener masterListClickListener;
 
     public MasterListFragment() {
     }
@@ -42,6 +42,13 @@ public class MasterListFragment extends Fragment {
         final RecyclerView.Adapter adapter = new MasterListAdapter(getContext(), allImages);
         grid.setAdapter(adapter);
 
+        Button btnNext = rootView.findViewById(R.id.btn_next);
+        btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                masterListClickListener.onNextClicked();
+            }
+        });
 
         return rootView;
     }
@@ -50,13 +57,14 @@ public class MasterListFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if(context instanceof OnImageClickListener) {
-            this.onImageClickListener = (OnImageClickListener) context;
+        if(context instanceof MasterListClickListener) {
+            this.masterListClickListener = (MasterListClickListener) context;
         }
     }
 
-    interface OnImageClickListener {
+    interface MasterListClickListener {
         void onImageSelected(int pos);
+        void onNextClicked();
     }
 
 

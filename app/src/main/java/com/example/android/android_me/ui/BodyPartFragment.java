@@ -1,8 +1,12 @@
 package com.example.android.android_me.ui;
 
+import android.content.ClipData;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +18,15 @@ import java.util.ArrayList;
 
 
 public class BodyPartFragment extends Fragment {
+    private static final String TAG = "BodyPartFragment";
+
     private final static String KEY_IMAGES = "IMAGES";
     private final static String KEY_INDEX = "INDEX";
+    private final static String KEY_CONTAINER = "CONTAINER_ID";
 
     private ArrayList<Integer> mImages;
-    private int mSelectedImage = 0;
+    private int mSelectedImage;
+    private int mContainerId;
 
     public BodyPartFragment() {
     }
@@ -43,15 +51,33 @@ public class BodyPartFragment extends Fragment {
         if(savedInstanceState != null) {
             mImages = savedInstanceState.getIntegerArrayList(KEY_IMAGES);
             mSelectedImage = savedInstanceState.getInt(KEY_INDEX);
-        } else {
+            mContainerId = savedInstanceState.getInt(KEY_CONTAINER);
+        }
+        if(mImages == null){
             mImages = getArguments().getIntegerArrayList(KEY_IMAGES);
             mSelectedImage = getArguments().getInt(KEY_INDEX);
+        }
+
+        if(container != null) {
+            mContainerId = container.getId();
         }
 
         View rootView = inflater.inflate(R.layout.fragment_body_part, container, false);
 
         final ImageView imageView = rootView.findViewById(R.id.body_part_image_view);
         imageView.setImageResource(mImages.get(mSelectedImage));
+        imageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                ClipData data = ClipData.newPlainText("image_id", mImages.get(mSelectedImage).toString()); // not really needed
+                View.DragShadowBuilder builder = new View.DragShadowBuilder(view);
+                view.startDrag(data, builder, view, 0);
+
+                ((DragAndDropSwitcher)getContext()).registerDrag(mContainerId, getTag());
+
+                return true;
+            }
+        });
 
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,23 +89,9 @@ public class BodyPartFragment extends Fragment {
                 imageView.setImageResource(mImages.get(mSelectedImage));
             }
         });
+        imageView.setOnDragListener(new MyOnDragListener());
 
         return rootView;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -87,7 +99,44 @@ public class BodyPartFragment extends Fragment {
 
         outState.putIntegerArrayList(KEY_IMAGES, mImages);
         outState.putInt(KEY_INDEX, mSelectedImage);
+        outState.putInt(KEY_CONTAINER, mContainerId);
 
         super.onSaveInstanceState(outState);
+    }
+
+    class MyOnDragListener implements View.OnDragListener {
+
+        @Override
+        public boolean onDrag(View view, DragEvent dragEvent) {
+            int action = dragEvent.getAction();
+            Log.d(TAG, "onDrag: action: " + action);
+
+            switch(action) {
+                case DragEvent.ACTION_DRAG_STARTED:
+                    break;
+                case DragEvent.ACTION_DRAG_ENTERED:
+                    Log.d(TAG, "onDrag: entered");
+                    break;
+                case DragEvent.ACTION_DRAG_EXITED:
+                    Log.d(TAG, "onDrag: exited");
+                    break;
+                case DragEvent.ACTION_DROP:
+                    Log.d(TAG, "onDrag: drop");
+                    ((DragAndDropSwitcher)getContext()).registerDrop(mContainerId, getTag());
+                    break;
+                case DragEvent.ACTION_DRAG_ENDED:
+                    Log.d(TAG, "onDrag: ended");
+                    break;
+                default:
+                    return false; // something went wrong
+            }
+
+            return true;
+        }
+    }
+
+    public interface DragAndDropSwitcher {
+        void registerDrag(int container, String tag);
+        void registerDrop(int container, String tag);
     }
 }
