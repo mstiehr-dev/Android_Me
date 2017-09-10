@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.example.android.android_me.DragAndDropSwitcherImpl;
 import com.example.android.android_me.R;
 import com.example.android.android_me.data.AndroidImageAssets;
 
@@ -43,6 +44,8 @@ public class AndroidMeActivity extends AppCompatActivity implements View.OnTouch
     private int headIndex;
     private int bodyIndex;
     private int footIndex;
+
+    private BodyPartFragment.DragAndDropSwitcher mDragAndDropSwitcher;
 
     // drag and drop
     String dragTag;
@@ -75,6 +78,8 @@ public class AndroidMeActivity extends AppCompatActivity implements View.OnTouch
                     .add(R.id.foot_container, footFragment, FRAGMENT_TAG_FOOT)
                     .commit();
         }
+
+        mDragAndDropSwitcher = new DragAndDropSwitcherImpl(this);
     }
 
     @Override
@@ -91,41 +96,6 @@ public class AndroidMeActivity extends AppCompatActivity implements View.OnTouch
         return false;
     }
 
-    @Override
-    public void registerDrag(int container, String tag) {
-        this.dragContainer = container;
-        this.dragTag = tag;
-    }
-
-    @Override
-    public void registerDrop(int container, String tag) {
-        this.dropContainer = container;
-        this.dropTag = tag;
-
-        switchDragAndDropImages();
-    }
-
-    private void switchDragAndDropImages() {
-        if(TextUtils.isEmpty(dragTag) || TextUtils.isEmpty(dropTag) || dragTag.equals(dropTag)) {
-            return; // do nothing
-        }
-
-        FragmentManager fm = getSupportFragmentManager();
-        Fragment dragFragment = fm.findFragmentByTag(dragTag);
-        Fragment dropFragment = fm.findFragmentByTag(dropTag);
-
-        fm.beginTransaction()
-                .remove(dropFragment)
-                .remove(dragFragment)
-                .commit();
-        fm.executePendingTransactions();
-
-        fm.beginTransaction()
-                .add(dropContainer, dragFragment, dragTag)
-                .add(dragContainer, dropFragment, dropTag)
-                .commit();
-    }
-
     public static Intent getIntent(Context context, int headIndex, int bodyIndex, int footIndex) {
         Bundle bundle = new Bundle();
         bundle.putInt(AndroidMeActivity.INDEX_KEY_HEAD, headIndex);
@@ -136,5 +106,15 @@ public class AndroidMeActivity extends AppCompatActivity implements View.OnTouch
         intent.putExtras(bundle);
 
         return intent;
+    }
+
+    @Override
+    public void registerDrag(int container, String tag) {
+        mDragAndDropSwitcher.registerDrag(container, tag);
+    }
+
+    @Override
+    public void registerDrop(int container, String tag) {
+        mDragAndDropSwitcher.registerDrop(container, tag);
     }
 }

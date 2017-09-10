@@ -1,10 +1,10 @@
 package com.example.android.android_me.ui;
 
 import android.content.ClipData;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.android.android_me.DragAndDropSwitcherImpl;
 import com.example.android.android_me.R;
 
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ public class BodyPartFragment extends Fragment {
     private ArrayList<Integer> mImages;
     private int mSelectedImage;
     private int mContainerId;
+
+    DragAndDropSwitcher mDragAndDropSwitcher;
 
     public BodyPartFragment() {
     }
@@ -62,6 +65,8 @@ public class BodyPartFragment extends Fragment {
             mContainerId = container.getId();
         }
 
+        this.mDragAndDropSwitcher = (DragAndDropSwitcher) getActivity();
+
         View rootView = inflater.inflate(R.layout.fragment_body_part, container, false);
 
         final ImageView imageView = rootView.findViewById(R.id.body_part_image_view);
@@ -73,7 +78,7 @@ public class BodyPartFragment extends Fragment {
                 View.DragShadowBuilder builder = new View.DragShadowBuilder(view);
                 view.startDrag(data, builder, view, 0);
 
-                ((DragAndDropSwitcher)getContext()).registerDrag(mContainerId, getTag());
+                mDragAndDropSwitcher.registerDrag(mContainerId, getTag());
 
                 return true;
             }
@@ -104,7 +109,7 @@ public class BodyPartFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
-    class MyOnDragListener implements View.OnDragListener {
+    private class MyOnDragListener implements View.OnDragListener {
 
         @Override
         public boolean onDrag(View view, DragEvent dragEvent) {
@@ -122,7 +127,7 @@ public class BodyPartFragment extends Fragment {
                     break;
                 case DragEvent.ACTION_DROP:
                     Log.d(TAG, "onDrag: drop");
-                    ((DragAndDropSwitcher)getContext()).registerDrop(mContainerId, getTag());
+                    mDragAndDropSwitcher.registerDrop(mContainerId, getTag());
                     break;
                 case DragEvent.ACTION_DRAG_ENDED:
                     Log.d(TAG, "onDrag: ended");
