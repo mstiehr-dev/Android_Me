@@ -76,18 +76,18 @@ public class MainActivity extends AppCompatActivity implements MasterListFragmen
             FragmentManager fm = getSupportFragmentManager();
             switch (bodyPart) {
                 case 0: // head
-                    containerId = R.id.head_container;
+                    containerId = fm.findFragmentByTag(FRAGMENT_TAG_HEAD).getId();
                     bodyPartFragment = BodyPartFragment.newInstance(AndroidImageAssets.getHeads(), index);
                     tag = FRAGMENT_TAG_HEAD;
                     break;
                 case 1: // body
-                    containerId = R.id.body_container;
+                    containerId = fm.findFragmentByTag(FRAGMENT_TAG_BODY).getId();
                     bodyPartFragment = BodyPartFragment.newInstance(AndroidImageAssets.getBodies(), index);
                     tag = FRAGMENT_TAG_BODY;
                     break;
                 case 2: // foot
                 default:
-                    containerId = R.id.foot_container;
+                    containerId = fm.findFragmentByTag(FRAGMENT_TAG_FOOT).getId();
                     bodyPartFragment = BodyPartFragment.newInstance(AndroidImageAssets.getLegs(), index);
                     tag = FRAGMENT_TAG_FOOT;
                     break;
